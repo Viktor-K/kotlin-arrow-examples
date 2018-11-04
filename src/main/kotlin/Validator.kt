@@ -1,3 +1,4 @@
+import arrow.data.*
 
 sealed class ProductValidationError(val errorMsg: String) {
     object InvalidSellingUnit : ProductValidationError("Missing sellingUnit")
@@ -6,9 +7,9 @@ sealed class ProductValidationError(val errorMsg: String) {
 
 class ProductValidator {
 
-    fun validateProduct(productData: ProductData) {
+    fun validateProduct(productData: ProductData): Validated<NonEmptyList<ProductValidationError>, ProductData> {
 
-        val result  = Validated
+        val result = Validated
                 .applicative(NonEmptyList.semigroup<ProductValidationError>())
                 .map(
                         productData.validateSellingUnit(),
@@ -17,11 +18,7 @@ class ProductValidator {
                 { it.a }
 
 
-        // result EXPECTED : Validated<NonEmptyList<ProductValidationError>, ProductData>
-        // result ACTUAL : Kind<arrow.data.ValidatedPartialOf<NonEmptyList<ProductValidationError>>, ProductData>
-        //        ValidatedPartialOf ???
-
-        return result
+        return result.fix()
     }
 
     private fun ProductData.validateSellingUnit(): Validated<NonEmptyList<ProductValidationError>, ProductData> =
